@@ -1,0 +1,104 @@
+.chats_container{
+    position: fixed;right: 40px;bottom: 0;z-index:100000;width: 300px;font-family: Arial, sans-serif;
+    height: 40px;overflow: hidden;
+    -moz-box-shadow: 0 0 7px rgba(0, 0, 0, 0.3);-webkit-box-shadow: 0 0 7px rgba(0, 0, 0, 0.3);box-shadow: 0 0 7px rgba(0, 0, 0, 0.3);
+}
+/* panel */
+.chats_title{
+    float:left;width: 280px;height: 40px;line-height: 40px;position: relative;padding: 0 10px;font-size: 15px;font-weight: bold;
+    box-sizing: content-box;
+    background: #2785C1;color:#FFF;
+}
+.chats_title .chats_text{
+    float:left;
+}
+.chats_title .chats_btn{
+    float:right;width: 33px;height: 26px;margin: 7px 0 0 0;text-align: center;line-height: 26px;font-weight: bold;font-size: 20px;
+    cursor: pointer;
+    -moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;
+    background: #46A0DA url('arrow_top.png') center no-repeat;
+}
+.active .chats_title .chats_btn{
+    background-image: url('arrow_bottom.png');
+}
+
+/* body */
+.chats_body{
+    float: left;width: 280px;height: 220px;padding: 10px;overflow: auto;
+    box-sizing: content-box;
+    background: #FFF;
+}
+.chats_message{
+    float:left;width: 100%;min-height: 36px;font-size: 12px;padding: 5px 0;
+    border-bottom: 2px solid #F2F2F2;
+}
+.chats_message .chats_name{
+    float:left;font-weight: bold;height: 16px;line-height: 16px;font-size: 13px;
+}
+.chats_message.message_type_0  .chats_name{
+    color: #000;
+}
+.chats_message.message_type_1  .chats_name{
+    color:#627AAD;
+}
+.chats_message .chats_time{
+    float:right;height: 16px;line-height: 16px;font-size: 10px;
+    color: #909090;
+}
+.chats_message .chats_text{
+    float:left;width: 100%;word-wrap: break-word;
+}
+
+/* send */
+.chats_write{
+    float: left;width: 100%;
+    background: #FFF;
+}
+
+.chats_top_write{
+    float:left;width: 100%;height: 20px;
+    background: #F0F0EF;border-top: 1px solid #D3D3D2;border-bottom: 1px solid #D3D3D2;
+}
+.chats_btn_finish{
+    float: right;height: 24px;line-height: 24px;font-size: 12px;margin: 7px 10px 0 0;padding: 0 15px;cursor: pointer;
+    box-sizing: content-box;display: none;
+    color:#646464;border: 1px solid #DADAD9;background: #F4F4F3;
+}
+.chats_preloader{
+    float:right;height: 18px;width: 18px;margin: 0px 1px 0 0;background: url(preloader.gif) center no-repeat;visibility: hidden;
+}
+.loading .chats_preloader{
+    visibility: visible;
+}
+.active .chats_btn_finish{
+    display: block;
+}
+.chats_btn_finish:hover{
+    color:#333;border: 1px solid #C4C4C3;background: #FCFCFB;
+}
+
+.chats_middle_write{
+    float:left;width: 100%;height: 60px;position: relative;
+}
+.chats_middle_write textarea{
+    float:left;margin: 0;padding: 5px;width: 290px;height: 48px;border: none !important;background: #FFF;font-size: 12px;
+    resize: none;
+    box-sizing: content-box;
+}
+.chats_btn_enter{
+    position: absolute;z-index: 10;right: 10px;bottom: 10px;cursor: pointer;width: 15px;height: 13px;
+    background: url(enter2.png) center no-repeat;
+}
+.chats_middle_write textarea::-webkit-input-placeholder       {opacity: 0.7; transition: opacity 0.3s ease;}
+.chats_middle_write textarea::-moz-placeholder                {opacity: 0.7; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:-moz-placeholder                 {opacity: 0.7; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:-moz-placeholder                 {opacity: 0.7; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:focus::-webkit-input-placeholder {opacity: 0; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:focus::-moz-placeholder          {opacity: 0; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:focus:-moz-placeholder           {opacity: 0; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:focus:-ms-input-placeholder      {opacity: 0; transition: opacity 0.3s ease;}
+
+.chats_bottom_write{
+    float:left;width: 100%;height: 20px;text-align: center;font-size: 12px;line-height: 20px;
+    background: #F0F0EF;border-top: 1px solid #D3D3D2;border-bottom: 1px solid #D3D3D2;
+}
