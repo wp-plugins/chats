@@ -1,9 +1,9 @@
-=== Chats ===
-Plugin Name: Chats
+=== Online Live Chat ===
+Plugin Name: Online Live Chat
 Version: 1.0.0
 Donate link: http://www.wp-chat.com/donate
 URI: www.wp-chat.com
-Tags: chat, chats
+Tags: chat, chats, Online, Live, Online chat, Live Chat
 Requires at least: 3.9
 Tested up to: 4.2.2
 Stable tag: trunk
@@ -12,11 +12,11 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Author: wp-chat
 Contributors: wp-chat.com
 
-Web Page Chats for Websites
+Online Live Chat for Websites
 
 == Description ==
 
-This is a Free Plugin with paid Service: Web Page Chats for Websites
+This is a Free Online Live Chat Plugin with paid Service: Online Live Chat for Websites
 
 To use this service, you need to add your site to your account at www.wp-chat.com.
 After adding the site to your control panel at wp-chat.com, your chat will be signed with a safety API key and automatically activated for all visitors of your website .
