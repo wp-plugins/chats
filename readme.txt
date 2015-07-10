@@ -12,7 +12,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Author: wp-chat
 Contributors: wp-chat.com
 
-Live Chat & Online Chat for Websites. Online chat: supports sales, customer support, live chat assistance, live help desk (helpdesk) & Free Chat Plugin
+Live Chat & Online Chat for Websites. Online chat: supports sales, customer support, live chat assistance, live help desk - Free Chat Plugin
 
 == Description ==
 
