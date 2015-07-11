@@ -9,7 +9,7 @@ Tested up to: 4.2.2
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Author: wp-chat
+Author: wp-chat.com
 Contributors: wp-chat.com
 
 Live Chat & Online Chat for Websites. Online chat: supports sales, customer support, live chat assistance, live help desk & Free Chat Plugin
