@@ -49,10 +49,10 @@ if ( ! class_exists( 'Chats' ) ) {
                 die();
             }
 
+            $created    = date('Y-m-d H:i:s');
+
             //save message from user
             if( $mode == 'add' and !empty($message) ){
-                $created    = date('Y-m-d H:i:s');
-
                 $addRes = self::add_messages($hash, $ip, $browser, $message, $created, 0, $message_page, $currentUserID);
                 if($addRes){
                     self::send_messages($hash, $ip, $browser, $message, $created, $message_page, $currentUserID);
@@ -70,6 +70,9 @@ if ( ! class_exists( 'Chats' ) ) {
 
             //finish chat
             if( $mode == 'finish' and !empty($hash) and !empty($ip) and !empty($browser) ){
+                //send log operation "finish"
+                self::send_log($hash, $ip, $browser, $created, 'finish', array(), $message_page, $currentUserID);
+
                 //get all messages for sending log to user
 
                 //remove all messages
@@ -165,12 +168,42 @@ if ( ! class_exists( 'Chats' ) ) {
         public static function send_messages($hash, $ip, $browser, $message, $created, $message_page = '', $currentUserID = 0){
             //maybe we should get email of logged users?
 
+            $personalKey = (string)get_option(ChatsAction::$optionKey, '');
+
             $data = array(
+                'action'            => 'message',
+                'key'               => $personalKey,
                 'hash'              => $hash,
                 'ip'                => $ip,
                 'browser'           => $browser,
                 'message'           => $message,
                 'message_page'      => $message_page,
+                'created'           => $created,
+                'plugin_version'    => self::$plugin_version,
+                'domain'            => site_url()
+            );
+            $requestVars = array('body' => array(ChatsAction::$tagAnswer => ChatsAction::convertString($data,'encode')));
+
+            return ChatsAction::requestServer( $requestVars );
+        }
+
+        /**
+         * Processing log from user
+         */
+        public static function send_log($hash, $ip, $browser, $created, $logCommand, $logData = array(), $referer_page = '', $currentUserID = 0){
+            //maybe we should get email of logged users?
+
+            $personalKey = (string)get_option(ChatsAction::$optionKey, '');
+
+            $data = array(
+                'action'            => 'log',
+                'key'               => $personalKey,
+                'hash'              => $hash,
+                'ip'                => $ip,
+                'browser'           => $browser,
+                'log_command'       => $logCommand,
+                'log_data'          => $logData,
+                'referer_page'      => $referer_page,
                 'created'           => $created,
                 'plugin_version'    => self::$plugin_version,
                 'domain'            => site_url()
@@ -226,7 +259,7 @@ if ( ! class_exists( 'Chats' ) ) {
                         $list[] = array(
                             'name'          => ($v_item->message_type == 0 ? 'You' : 'Admin'),
                             'message_id'    => $v_item->id.'_'.$hash,
-                            'text'          => $v_item->message,
+                            'text'          => nl2br($v_item->message),
                             'time'          => date('H:i', @strtotime($v_item->created)),
                             'type'          => $v_item->message_type
                         );

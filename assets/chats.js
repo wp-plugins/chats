@@ -175,6 +175,7 @@
                         'message_page'  : window.location.href
                     },
                     dataType: "json",
+                    cache: false,
                     success: function(data){
                         if(data && data.result == 1){
                             thisChat.loadMessages('user_last',1,function(){
@@ -233,8 +234,10 @@
                 '"': '&quot;',
                 "'": '&#039;'
             };
+            text = text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            text = text.replace('&lt;br /&gt;','<br />');
 
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            return text;
         };
 
         this.template = function(){
@@ -296,12 +299,19 @@
             $.ajax({
                 type: "POST",
                 url: chats_parameters.request_url,
-                data: {'mode': 'finish', 'action': settings.ajaxAction},
+                data: {
+                    'mode'          : 'finish',
+                    'action'        : settings.ajaxAction,
+                    'message_page'  : window.location.href
+                },
                 dataType: "json",
+                cache: false,
                 success: function(data){
                     //set new hash
                     settings.chatHash = thisChat.randHash();
                     $.cookie(chats_parameters.cookie_prefix, settings.chatHash);
+
+                    settings.messages = {};
 
                     //set close status for preventing opening after reloading page
                     //settings.startUpOpen = 0;
