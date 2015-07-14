@@ -57,7 +57,10 @@ Screens coming soon
 
 == Changelog ==
 
-Changelog coming soon
+= Chat - Live Chat, Support, Sales (Chats version 1.0.0) =
+* Improved sending of chats messages with ajax. 
+* To chat was added clearing of chat messages after finishing chat. 
+* To live chats added sending of chat logs. Improved formatting of chat messages in chat texts.
 
 == Upgrade Notice ==
 
