@@ -3,7 +3,7 @@
 Plugin Name: Chats
 Plugin URI: http://www.wp-chat.com
 Description: Web Page Chats for Websites
-Version: 1.0
+Version: 1.0.1
 Author: wp-chat
 Author URI: http://www.wp-chat.com
 */
@@ -14,13 +14,98 @@ if ( ! class_exists( 'Chats' ) ) {
     class Chats
     {
         public static $plugin_name      = 'chats';
-        public static $plugin_version   = '1.0';
+        public static $plugin_version   = '1.0.1';
         public static $table_prefix     = 'chats_';
+        public static $tag_prefix       = 'chats';
         public static $optionParameters = 'chats_options';
         public static $defaultOptions   = array(
-            'chat_width' => 300,
+            'panel_background'          => '#2785C1',
+            'panel_border_color'        => '#2785C1',
+            'body_background'           => '#FFFFFF',
+            'btn_finish_background'     => '#FCFCFB',
+            'btn_finish_color'          => '#333333',
+            'btn_finish_border_color'   => '#C4C4C3',
+            'btn_expand_background'     => '#46A0DA',
+            'admin_signature_color'     => '#627AAD',
+            'admin_text_color'          => '#333333',
+            'user_signature_color'      => '#000000',
+            'user_text_color'           => '#333333',
+            'time_color'                => '#909090',
+            'message_border_color'      => '#F2F2F2',
+            'write_panel_background'    => '#F0F0EF',
+            'write_area_background'     => '#FFFFFF',
+            'write_area_color'          => '#333333',
+
+            'width'                     => 300,
+            'position'                  => 'right',
+            'status'                    => 1,
+
+            'admin_signature'           => 'Admin',
+            'user_signature'            => 'You',
+            'hello_message'             => 'Hello. Do you have any questions?',
+            'panel_title'               => 'Chat with us',
+            'enter_text_placeholder'    => 'Enter your message...',
+            'btn_finish_text'           => 'Finish',
+            'thank_message'             => 'Thank you for using Live Chat. To help us serve you better, please take a moment to complete a short survey. It will display as you close the chat by clicking the chat bubble at the top right of the screen. Thanks for chatting. Please click the "Close" icon, and then tell us how we did.',
+            'offline_message'           => 'Sorry, but we are offline now. Please, leave your contact email and your message. We will communicate with you as soon as possible.',
+            'email_label'               => 'Email',
+            'name_label'                => 'Name',
+            'message_label'             => 'Message',
+            'send_email'                => 'Send email',
+            'offline_thank_message'     => 'Thank you. Message was sent.',
         );
         public static $cookiePrefix     = 'chats_hash';
+        public static $translation = array(
+            'en'    => array(
+                'page_settings_title'               => 'Chats Settings',
+                'settings_tab_color'                => 'Colors',
+                'settings_width'                    => 'Width',
+                'settings_panel_background'         => 'Title panel Background',
+                'settings_panel_border_color'       => 'Chat border color',
+                'settings_body_background'          => 'Message panel background',
+                'settings_btn_finish_background'    => 'Finish button background',
+                'settings_btn_finish_color'         => 'Finish button color',
+                'settings_btn_finish_border_color'  => 'Finish button border color',
+                'settings_btn_expand_background'    => 'Expand button background',
+                'settings_admin_signature_color'    => 'Admin signature color',
+                'settings_admin_text_color'         => 'Admin text color',
+                'settings_user_signature_color'     => 'User signature color',
+                'settings_user_text_color'          => 'User text color',
+                'settings_time_color'               => 'Message time color',
+                'settings_message_border_color'     => 'Message border color',
+                'settings_write_panel_background'   => 'Write panel background',
+                'settings_write_area_background'    => 'Write area background',
+                'settings_write_area_color'         => 'Write area color',
+
+                'settings_tab_template'             => 'Template',
+                'settings_position'                 => 'Position',
+                'settings_position_left'            => 'Left',
+                'settings_position_right'           => 'Right',
+                'settings_status'                   => 'Chat status',
+                'settings_status_1'                 => 'Chat online',
+                'settings_status_2'                 => 'Chat hidden',
+                'settings_status_3'                 => 'Chat offline',
+
+                'settings_tab_text'                 => 'Text',
+                'settings_admin_signature'          => 'Admin Signature',
+                'settings_user_signature'           => 'User Signature',
+                'settings_hello_message'            => '"Hello" message',
+                'settings_panel_title'              => 'Panel title',
+                'settings_enter_text_placeholder'   => 'Enter text placeholder',
+                'settings_btn_finish_text'          => 'Finish button label',
+                'settings_thank_message'            => '"Thank" message',
+                'settings_offline_message'          => '"Offline chat" message',
+                'settings_email_label'              => 'Email',
+                'settings_name_label'               => 'Name',
+                'settings_message_label'            => 'Message label',
+                'settings_send_email'               => 'Send email button',
+                'settings_offline_thank_message'    => '"Offline thank" message',
+
+                'settings_tab_auth'                 => 'Authorization',
+                'settings_personal_key'             => 'Personal key',
+                'settings_personal_key_desc'        => 'Be careful, this key should be the same as in admin panel of site',
+            )
+        );
 
         /**
          * Listen incoming request from js
@@ -44,8 +129,12 @@ if ( ! class_exists( 'Chats' ) ) {
             $message_page   = @strip_tags(trim($_POST['message_page']));
             $queryMode      = @$_POST['queryMode'];
             $countMessage   = @$_POST['countMessage'];
+            //offline data
+            $text   = @strip_tags(trim($_POST['text']));
+            $name   = @strip_tags(trim($_POST['name']));
+            $email  = @strip_tags(trim($_POST['email']));
 
-            if( empty($mode) or empty($hash) or !in_array($mode, array('add', 'read', 'finish')) ){
+            if( empty($mode) or empty($hash) or !in_array($mode, array('add', 'read', 'finish', 'send_email')) ){
                 die();
             }
 
@@ -79,6 +168,13 @@ if ( ! class_exists( 'Chats' ) ) {
                 self::remove_messages($hash, $ip, 'user');
             }
 
+            //send message
+            if( $mode == 'send_email' and !empty($hash) and !empty($ip) and !empty($browser) and !empty($text) and !empty($name) and !empty($email) ){
+                $sendRes = self::send_offline_messages($hash, $ip, $browser, $text, $name, $email, $created, $message_page, $currentUserID);
+
+                print json_encode(array('result' => $sendRes));exit;
+            }
+
             exit;
         }
 
@@ -86,8 +182,15 @@ if ( ! class_exists( 'Chats' ) ) {
          * Init chat. Should be started at all pages on frontend
          */
         public static function wp_head(){
+        	//delete_option( ChatsAction::$optionKey );
             $personalKey = (string)get_option(ChatsAction::$optionKey, '');
             if(empty($personalKey)){
+                return true;
+            }
+
+            //parameters of chat
+            $options  = self::plugin_options( 'get' );
+            if( (int)$options['status'] == 2){
                 return true;
             }
 
@@ -97,10 +200,49 @@ if ( ! class_exists( 'Chats' ) ) {
                 wp_register_style( 'chats_css', plugins_url( self::$plugin_name . '/assets/chats.css' ) );
 
                 //add parameters in js
-                $js_parameters = array(
+                $js_parameters  = array(
                     'site_url'      => site_url(),
                     'request_url'   => site_url() . '/wp-admin/admin-ajax.php',
-                    'cookie_prefix' => self::$cookiePrefix
+                    'cookie_prefix' => self::$cookiePrefix,
+                    'tag_prefix'    => self::$tag_prefix,
+                    'sound_path'    => plugins_url(self::$plugin_name . '/assets'),
+                    'text'  => array(
+                        'admin_signature'           => $options['admin_signature'],
+                        'user_signature'            => $options['user_signature'],
+                        'hello_message'             => $options['hello_message'],
+                        'panel_title'               => $options['panel_title'],
+                        'enter_text_placeholder'    => $options['enter_text_placeholder'],
+                        'btn_finish_text'           => $options['btn_finish_text'],
+                        'offline_message'           => $options['offline_message'],
+                        'email_label'               => $options['email_label'],
+                        'name_label'                => $options['name_label'],
+                        'message_label'             => $options['message_label'],
+                        'send_email'                => $options['send_email'],
+                        'offline_thank_message'     => $options['offline_thank_message'],
+                    ),
+                    'color' => array(
+                        'panel_background'          => $options['panel_background'],
+                        'panel_border_color'        => $options['panel_border_color'],
+                        'body_background'           => $options['body_background'],
+                        'btn_finish_background'     => $options['btn_finish_background'],
+                        'btn_finish_color'          => $options['btn_finish_color'],
+                        'btn_finish_border_color'   => $options['btn_finish_border_color'],
+                        'btn_expand_background'     => $options['btn_expand_background'],
+                        'admin_signature_color'     => $options['admin_signature_color'],
+                        'admin_text_color'          => $options['admin_text_color'],
+                        'user_signature_color'      => $options['user_signature_color'],
+                        'user_text_color'           => $options['user_text_color'],
+                        'time_color'                => $options['time_color'],
+                        'message_border_color'      => $options['message_border_color'],
+                        'write_panel_background'    => $options['write_panel_background'],
+                        'write_area_background'     => $options['write_area_background'],
+                        'write_area_color'          => $options['write_area_color'],
+                    ),
+                    'template'  => array(
+                        'width'     => $options['width'],
+                        'position'  => $options['position'],
+                        'status'    => $options['status'],
+                    )
                 );
                 wp_localize_script('chats_js', 'chats_parameters', $js_parameters);
 
@@ -125,19 +267,25 @@ if ( ! class_exists( 'Chats' ) ) {
          */
         public static function admin_notices(){
             if(is_admin()) {
-                global $status, $page, $s;
-                $context    = $status;
-                $plugin     = 'chats/chats.php';
-                $nonce      = wp_create_nonce('deactivate-plugin_' . $plugin);
-                $actions    = 'plugins.php?action=deactivate&amp;plugin=' . urlencode($plugin) . '&amp;plugin_status=' . $context . '&amp;paged=' . $page . '&amp;s=' . $s  . '&amp;_wpnonce=' . $nonce;
 
+                //notice about registration or authorization
+                $plugin         = self::$plugin_name.'/'.self::$plugin_name.'.php';
                 $personaKey     = (string)get_option(ChatsAction::$optionKey, '');
                 $pluginStatus   = is_plugin_active($plugin);
-                if( !empty($personaKey) or !$pluginStatus ){
-                    return;
+                if( empty($personaKey) and $pluginStatus ){
+                    global $status, $page, $s;
+                    $nonce      = wp_create_nonce('deactivate-plugin_' . $plugin);
+                    $actions    = 'plugins.php?action=deactivate&amp;plugin=' . urlencode($plugin) . '&amp;plugin_status=' . $status . '&amp;paged=' . $page . '&amp;s=' . $s  . '&amp;_wpnonce=' . $nonce;
+                    echo '<div style="height:50px;line-height:50px;font-size:16px;font-weight:bold;" class="notice-warning notice">To use "chats" plugin, please add this site to <a target="_blank" href="'.ChatsAction::$site.'">your account</a> at '.str_replace('http://','',ChatsAction::$site).' or <a href="'.$actions.'">deactivate</a> Chats plugin.</div>';
                 }
-                $msg = '';
-                echo '<div style="height:50px;line-height:50px;font-size:16px;font-weight:bold;" class="notice-warning notice">To use "chats" plugin, please add this site to <a target="_blank" href="'.ChatsAction::$site.'">your account</a> at '.str_replace('http://','',ChatsAction::$site).' or <a href="'.$actions.'">deactivate</a> Chats plugin.</div>';
+            }
+        }
+
+        public static function admin_menu(){
+            if(is_admin()) {
+                //settings menu for admin
+                add_menu_page('Chats Settings', 'Chats Settings', 'manage_options', 'chats_settings_page', array('Chats', 'chats_settings_page'));
+                add_action( 'admin_init', array('Chats', 'register_settings') );
             }
         }
 
@@ -145,7 +293,7 @@ if ( ! class_exists( 'Chats' ) ) {
          * Plugin options
          */
         public static function plugin_options($mode = 'add', $options = array()){
-            if(!empty($options)){
+            if(empty($options)){
                 $options = self::$defaultOptions;
             }
 
@@ -154,11 +302,16 @@ if ( ! class_exists( 'Chats' ) ) {
             }
 
             if( $mode == 'get' ){
-                return get_option(self::$optionParameters, $options);
+                $optionValue = get_option(self::$optionParameters, $options);
+                foreach(self::$defaultOptions as $k_op => $v_op){
+                    $optionValue[$k_op] = (empty($optionValue[$k_op]) ? $v_op : $optionValue[$k_op]);
+                }
+                return $optionValue;
             }
 
             if( $mode == 'remove' ){
-                delete_option( self::$optionParameters );
+                delete_option( ChatsAction::$optionKey );//delete personal key of plugin
+                delete_option( self::$optionParameters );//delete settings options
             }
         }
 
@@ -177,6 +330,31 @@ if ( ! class_exists( 'Chats' ) ) {
                 'ip'                => $ip,
                 'browser'           => $browser,
                 'message'           => $message,
+                'message_page'      => $message_page,
+                'created'           => $created,
+                'plugin_version'    => self::$plugin_version,
+                'domain'            => site_url()
+            );
+            $requestVars = array('body' => array(ChatsAction::$tagAnswer => ChatsAction::convertString($data,'encode')));
+
+            return ChatsAction::requestServer( $requestVars );
+        }
+
+        /**
+         * Send message from admin to user in offline mode
+         */
+        public function send_offline_messages($hash, $ip, $browser, $message, $name, $email, $created, $message_page, $currentUserID){
+            $personalKey = (string)get_option(ChatsAction::$optionKey, '');
+
+            $data = array(
+                'action'            => 'offline_message',
+                'key'               => $personalKey,
+                'hash'              => $hash,
+                'ip'                => $ip,
+                'browser'           => $browser,
+                'message'           => $message,
+                'user_name'         => $name,
+                'user_email'        => $email,
                 'message_page'      => $message_page,
                 'created'           => $created,
                 'plugin_version'    => self::$plugin_version,
@@ -214,12 +392,33 @@ if ( ! class_exists( 'Chats' ) ) {
         }
 
         /**
+         * Processing update of options
+         */
+        public static function send_options($options){
+            //maybe we should get email of logged users?
+
+            $personalKey = (string)get_option(ChatsAction::$optionKey, '');
+
+            $data = array(
+                'action'            => 'update_options',
+                'key'               => $personalKey,
+                'options'           => json_encode($options),
+                'plugin_version'    => self::$plugin_version,
+                'domain'            => site_url()
+            );
+            $requestVars = array('body' => array(ChatsAction::$tagAnswer => ChatsAction::convertString($data,'encode')));
+
+            return ChatsAction::requestServer( $requestVars );
+        }
+
+        /**
          * Read messages from db
          */
         public static function read_messages($hash, $ip, $browser = '', $currentUserID = 0, $parameters = array()){
             global $wpdb;
 
-            $list = array();
+            $list       = array();
+            $options    = self::plugin_options( 'get' );
 
             $limit = @(int)$parameters['countMessage'];
             $limit = (empty($limit) ? 1 : $limit);
@@ -257,7 +456,7 @@ if ( ! class_exists( 'Chats' ) ) {
                 if( !empty($messages) ){
                     foreach($messages as $k_item => $v_item){
                         $list[] = array(
-                            'name'          => ($v_item->message_type == 0 ? 'You' : 'Admin'),
+                            'name'          => ($v_item->message_type == 0 ? $options['user_signature'] : $options['admin_signature']),
                             'message_id'    => $v_item->id.'_'.$hash,
                             'text'          => nl2br($v_item->message),
                             'time'          => date('H:i', @strtotime($v_item->created)),
@@ -357,6 +556,349 @@ if ( ! class_exists( 'Chats' ) ) {
             return $user_ip;
         }
 
+        public static function trans($var, $lang = 'en'){
+            $text = $var;
+            if( isset(self::$translation[$lang]) ){
+                if( isset(self::$translation[$lang][$var]) ){
+                    $text = self::$translation[$lang][$var];
+                }elseif( isset(self::$translation['en'][$var]) ){
+                    $text =  self::$translation['en'][$var];
+                }
+            }
+
+            return $text;
+        }
+
+        public static function chats_settings_page(){
+            wp_register_script('chats_settings_js', plugins_url(self::$plugin_name . '/assets/jquery.minicolors.min.js'), array(), self::$plugin_version, false);
+            wp_register_style( 'chats_settings_css', plugins_url( self::$plugin_name . '/assets/jquery.minicolors.css' ) );
+            wp_register_style( 'chats_settings_css2', plugins_url( self::$plugin_name . '/assets/admin.css' ) );
+
+            wp_enqueue_script( 'jquery' );
+            wp_enqueue_script( 'chats_settings_js' );
+            wp_enqueue_style( 'chats_settings_css' );
+            wp_enqueue_style( 'chats_settings_css2' );
+        ?>
+            <div class="wrap" id="chat_settings_page_over">
+                <h2><?php echo self::trans('page_settings_title');?></h2>
+                <form method="post" action="options.php">
+                    <?php
+                    settings_fields( self::$optionParameters );
+                    //do_settings_sections( self::$plugin_name );
+                    $options        = self::plugin_options( 'get' );
+                    $personalKey    = (string)get_option(ChatsAction::$optionKey, '');
+                    ?>
+                    <div id="chat_settings_page">
+                        <div id="chats_color_tab" class="tab">
+                            <table class="form-table">
+                                <tr class="row_title">
+                                    <th scope="row" colspan="2"><?php echo self::trans('settings_tab_color');?></th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 283px" scope="row"><?php echo self::trans('settings_panel_background');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[panel_background]" value="<?php echo esc_attr( @$options['panel_background'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_btn_finish_background');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[btn_finish_background]" value="<?php echo esc_attr( @$options['btn_finish_background'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_btn_finish_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[btn_finish_color]" value="<?php echo esc_attr( @$options['btn_finish_color'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_btn_finish_border_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[btn_finish_border_color]" value="<?php echo esc_attr( @$options['btn_finish_border_color'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_btn_expand_background');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[btn_expand_background]" value="<?php echo esc_attr( @$options['btn_expand_background'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_panel_border_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[panel_border_color]" value="<?php echo esc_attr( @$options['panel_border_color'] ); ?>" /></td>
+                                </tr>
+                                <tr class="row_border"><td colspan="2">&nbsp;</td></tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_body_background');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[body_background]" value="<?php echo esc_attr( @$options['body_background'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_admin_signature_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[admin_signature_color]" value="<?php echo esc_attr( @$options['admin_signature_color'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_admin_text_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[admin_text_color]" value="<?php echo esc_attr( @$options['admin_text_color'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_user_signature_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[user_signature_color]" value="<?php echo esc_attr( @$options['user_signature_color'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_user_text_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[user_text_color]" value="<?php echo esc_attr( @$options['user_text_color'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_time_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[time_color]" value="<?php echo esc_attr( @$options['time_color'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_message_border_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[message_border_color]" value="<?php echo esc_attr( @$options['message_border_color'] ); ?>" /></td>
+                                </tr>
+                                <tr class="row_border"><td colspan="2">&nbsp;</td></tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_write_panel_background');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[write_panel_background]" value="<?php echo esc_attr( @$options['write_panel_background'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_write_area_background');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[write_area_background]" value="<?php echo esc_attr( @$options['write_area_background'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_write_area_color');?>:</th>
+                                    <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[write_area_color]" value="<?php echo esc_attr( @$options['write_area_color'] ); ?>" /></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div id="chats_text_tab" class="tab">
+                            <table class="form-table">
+                                <tr class="row_title">
+                                    <th scope="row" colspan="2"><?php echo self::trans('settings_tab_text');?></th>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_panel_title');?>:</th>
+                                    <td><input type="text" name="<?php echo self::$optionParameters;?>[panel_title]" value="<?php echo esc_attr( @$options['panel_title'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_btn_finish_text');?>:</th>
+                                    <td><input type="text" name="<?php echo self::$optionParameters;?>[btn_finish_text]" value="<?php echo esc_attr( @$options['btn_finish_text'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_admin_signature');?>:</th>
+                                    <td><input type="text" name="<?php echo self::$optionParameters;?>[admin_signature]" value="<?php echo esc_attr( @$options['admin_signature'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_user_signature');?>:</th>
+                                    <td><input type="text" name="<?php echo self::$optionParameters;?>[user_signature]" value="<?php echo esc_attr( @$options['user_signature'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_email_label');?>:</th>
+                                    <td><input type="text" name="<?php echo self::$optionParameters;?>[email_label]" value="<?php echo esc_attr( @$options['email_label'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_name_label');?>:</th>
+                                    <td><input type="text" name="<?php echo self::$optionParameters;?>[name_label]" value="<?php echo esc_attr( @$options['name_label'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_message_label');?>:</th>
+                                    <td><input type="text" name="<?php echo self::$optionParameters;?>[message_label]" value="<?php echo esc_attr( @$options['message_label'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_send_email');?>:</th>
+                                    <td><input type="text" name="<?php echo self::$optionParameters;?>[send_email]" value="<?php echo esc_attr( @$options['send_email'] ); ?>" /></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_enter_text_placeholder');?>:</th>
+                                    <td><textarea name="<?php echo self::$optionParameters;?>[enter_text_placeholder]"><?php echo esc_attr( @$options['enter_text_placeholder'] ); ?></textarea></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_hello_message');?>:</th>
+                                    <td><textarea name="<?php echo self::$optionParameters;?>[hello_message]"><?php echo esc_attr( @$options['hello_message'] ); ?></textarea></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_thank_message');?>:</th>
+                                    <td><textarea name="<?php echo self::$optionParameters;?>[thank_message]"><?php echo esc_attr( @$options['thank_message'] ); ?></textarea></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_offline_message');?>:</th>
+                                    <td><textarea name="<?php echo self::$optionParameters;?>[offline_message]"><?php echo esc_attr( @$options['offline_message'] ); ?></textarea></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_offline_thank_message');?>:</th>
+                                    <td><textarea name="<?php echo self::$optionParameters;?>[offline_thank_message]"><?php echo esc_attr( @$options['offline_thank_message'] ); ?></textarea></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div id="chats_template_tab" class="tab">
+                            <table class="form-table">
+                                <tr class="row_title">
+                                    <th scope="row" colspan="2"><?php echo self::trans('settings_tab_template');?></th>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_width');?>:</th>
+                                    <td><input style="width:90px;" type="text" name="<?php echo self::$optionParameters;?>[width]" value="<?php echo esc_attr( @$options['width'] ); ?>" /> px</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_position');?>:</th>
+                                    <td>
+                                        <select style="width: 185px;" name="<?php echo self::$optionParameters;?>[position]">
+                                            <option <?php echo ( (empty($options['position']) or @$options['position'] == 'right') ? 'selected="selected"' : '');?> value="right"><?php echo self::trans('settings_position_right');?></option>
+                                            <option <?php echo ( @$options['position'] == 'left' ? 'selected="selected"' : '');?> value="left"><?php echo self::trans('settings_position_left');?></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_status');?>:</th>
+                                    <td>
+                                        <select style="width: 185px;" name="<?php echo self::$optionParameters;?>[status]">
+                                            <option <?php echo ( @(int)$options['status'] == 1 ? 'selected="selected"' : '');?> value="1"><?php echo self::trans('settings_status_1');?></option>
+                                            <option <?php echo ( @(int)$options['status'] == 2 ? 'selected="selected"' : '');?> value="2"><?php echo self::trans('settings_status_2');?></option>
+                                            <option <?php echo ( @(int)$options['status'] == 3 ? 'selected="selected"' : '');?> value="3"><?php echo self::trans('settings_status_3');?></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div id="chats_auth_tab" class="tab">
+                            <table class="form-table">
+                                <tr class="row_title">
+                                    <th scope="row" colspan="2"><?php echo self::trans('settings_tab_auth');?></th>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php echo self::trans('settings_personal_key');?>:</th>
+                                    <td>
+                                        <input type="text" name="<?php echo self::$optionParameters;?>[personal_key]" value="<?php echo esc_attr($personalKey);?>" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colspan="2"><?php echo self::trans('settings_personal_key_desc').' '.ChatsAction::$adminRequestSite;?></th>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <?php submit_button(); ?>
+                    </div>
+                </form>
+            </div>
+            <script>
+                jQuery(document).ready( function() {
+                jQuery.each(jQuery('.settings_colorpicker'), function() {
+                    jQuery(this).minicolors({
+                        defaultValue: jQuery(this).attr('data-defaultValue') || '',
+                        inline: jQuery(this).attr('data-inline') === 'true',
+                        letterCase: jQuery(this).attr('data-letterCase') || 'lowercase',
+                        position: jQuery(this).attr('data-position') || 'bottom left',
+                        theme: 'default'
+                    });
+
+                });
+                })
+            </script>
+        <?php
+        }
+
+        public static function register_settings(){
+            register_setting( self::$optionParameters, self::$optionParameters, array('Chats', 'validate_settings') );
+        }
+
+        public static function validate_settings($input, $sendOptions = 1){
+            $input = array_map('trim',$input);
+            //filter
+            $input['panel_background']          = self::validate_settings_color($input['panel_background']);
+            $input['panel_border_color']        = self::validate_settings_color($input['panel_border_color']);
+            $input['body_background']           = self::validate_settings_color($input['body_background']);
+            $input['btn_finish_background']     = self::validate_settings_color($input['btn_finish_background']);
+            $input['btn_finish_color']          = self::validate_settings_color($input['btn_finish_color']);
+            $input['btn_finish_border_color']   = self::validate_settings_color($input['btn_finish_border_color']);
+            $input['btn_expand_background']     = self::validate_settings_color($input['btn_expand_background']);
+            $input['admin_signature_color']     = self::validate_settings_color($input['admin_signature_color']);
+            $input['admin_text_color']          = self::validate_settings_color($input['admin_text_color']);
+            $input['user_signature_color']      = self::validate_settings_color($input['user_signature_color']);
+            $input['user_text_color']           = self::validate_settings_color($input['user_text_color']);
+            $input['time_color']                = self::validate_settings_color($input['time_color']);
+            $input['message_border_color']      = self::validate_settings_color($input['message_border_color']);
+            $input['write_panel_background']    = self::validate_settings_color($input['write_panel_background']);
+            $input['write_area_background']     = self::validate_settings_color($input['write_area_background']);
+            $input['write_area_color']          = self::validate_settings_color($input['write_area_color']);
+
+            $input['width']     = (int)$input['width'];
+            $input['position']  = (!in_array($input['position'], array('right', 'left')) ? '' : $input['position']);
+            $input['status']    = (!in_array((int)$input['status'], array(1, 2, 3)) ? 0 : (int)$input['status']);
+
+            $input['admin_signature']           = self::validate_settings_text($input['admin_signature']);
+            $input['user_signature']            = self::validate_settings_text($input['user_signature']);
+            $input['hello_message']             = self::validate_settings_text($input['hello_message']);
+            $input['panel_title']               = self::validate_settings_text($input['panel_title']);
+            $input['enter_text_placeholder']    = self::validate_settings_text($input['enter_text_placeholder']);
+            $input['btn_finish_text']           = self::validate_settings_text($input['btn_finish_text']);
+            $input['thank_message']             = self::validate_settings_text($input['thank_message']);
+            $input['offline_message']           = self::validate_settings_text($input['offline_message']);
+            $input['email_label']               = self::validate_settings_text($input['email_label']);
+            $input['name_label']                = self::validate_settings_text($input['name_label']);
+            $input['message_label']             = self::validate_settings_text($input['message_label']);
+            $input['send_email']                = self::validate_settings_text($input['send_email']);
+            $input['offline_thank_message']     = self::validate_settings_text($input['offline_thank_message']);
+
+            //values
+            $input['panel_background']          = (empty($input['panel_background'])            ? self::$defaultOptions['panel_background']             : $input['panel_background']);
+            $input['panel_border_color']        = (empty($input['panel_border_color'])          ? self::$defaultOptions['panel_border_color']           : $input['panel_border_color']);
+            $input['body_background']           = (empty($input['body_background'])             ? self::$defaultOptions['body_background']              : $input['body_background']);
+            $input['btn_finish_background']     = (empty($input['btn_finish_background'])       ? self::$defaultOptions['btn_finish_background']        : $input['btn_finish_background']);
+            $input['btn_finish_color']          = (empty($input['btn_finish_color'])            ? self::$defaultOptions['btn_finish_color']             : $input['btn_finish_color']);
+            $input['btn_finish_border_color']   = (empty($input['btn_finish_border_color'])     ? self::$defaultOptions['btn_finish_border_color']      : $input['btn_finish_border_color']);
+            $input['btn_expand_background']     = (empty($input['btn_expand_background'])       ? self::$defaultOptions['btn_expand_background']        : $input['btn_expand_background']);
+            $input['admin_signature_color']     = (empty($input['admin_signature_color'])       ? self::$defaultOptions['admin_signature_color']        : $input['admin_signature_color']);
+            $input['admin_text_color']          = (empty($input['admin_text_color'])            ? self::$defaultOptions['admin_text_color']             : $input['admin_text_color']);
+            $input['user_signature_color']      = (empty($input['user_signature_color'])        ? self::$defaultOptions['user_signature_color']         : $input['user_signature_color']);
+            $input['user_text_color']           = (empty($input['user_text_color'])             ? self::$defaultOptions['user_text_color']              : $input['user_text_color']);
+            $input['time_color']                = (empty($input['time_color'])                  ? self::$defaultOptions['time_color']                   : $input['time_color']);
+            $input['message_border_color']      = (empty($input['message_border_color'])        ? self::$defaultOptions['message_border_color']         : $input['message_border_color']);
+            $input['write_panel_background']    = (empty($input['write_panel_background'])      ? self::$defaultOptions['write_panel_background']       : $input['write_panel_background']);
+            $input['write_area_background']     = (empty($input['write_area_background'])       ? self::$defaultOptions['write_area_background']        : $input['write_area_background']);
+            $input['write_area_color']          = (empty($input['write_area_color'])            ? self::$defaultOptions['write_area_color']             : $input['write_area_color']);
+
+            $input['width']     = (empty($input['width'])       ? self::$defaultOptions['width']    : $input['width']);
+            $input['position']  = (empty($input['position'])    ? self::$defaultOptions['position'] : $input['position']);
+            $input['status']    = (empty($input['status'])      ? self::$defaultOptions['status']   : $input['status']);
+
+            $input['admin_signature']           = (empty($input['admin_signature'])         ? self::$defaultOptions['admin_signature']          : $input['admin_signature']);
+            $input['user_signature']            = (empty($input['user_signature'])          ? self::$defaultOptions['user_signature']           : $input['user_signature']);
+            $input['hello_message']             = (empty($input['hello_message'])           ? self::$defaultOptions['hello_message']            : $input['hello_message']);
+            $input['panel_title']               = (empty($input['panel_title'])             ? self::$defaultOptions['panel_title']              : $input['panel_title']);
+            $input['enter_text_placeholder']    = (empty($input['enter_text_placeholder'])  ? self::$defaultOptions['enter_text_placeholder']   : $input['enter_text_placeholder']);
+            $input['btn_finish_text']           = (empty($input['btn_finish_text'])         ? self::$defaultOptions['btn_finish_text']          : $input['btn_finish_text']);
+            $input['thank_message']             = (empty($input['thank_message'])           ? self::$defaultOptions['thank_message']            : $input['thank_message']);
+            $input['offline_message']           = (empty($input['offline_message'])         ? self::$defaultOptions['offline_message']          : $input['offline_message']);
+            $input['email_label']               = (empty($input['email_label'])             ? self::$defaultOptions['email_label']              : $input['email_label']);
+            $input['name_label']                = (empty($input['name_label'])              ? self::$defaultOptions['name_label']               : $input['name_label']);
+            $input['message_label']             = (empty($input['message_label'])           ? self::$defaultOptions['message_label']            : $input['message_label']);
+            $input['send_email']                = (empty($input['send_email'])              ? self::$defaultOptions['send_email']               : $input['send_email']);
+            $input['offline_thank_message']     = (empty($input['offline_thank_message'])   ? self::$defaultOptions['offline_thank_message']    : $input['offline_thank_message']);
+
+            //special case for personal key
+            if( isset($input['personal_key']) ){
+                update_option(ChatsAction::$optionKey, $input['personal_key']);
+                unset($input['personal_key']);
+            }
+
+            //send options to server
+            if($sendOptions == 1){
+                self::send_options($input);
+            }
+
+            return $input;
+        }
+
+        public static function validate_settings_color($color = ''){
+            $color = trim($color);
+            if( empty($color) or !preg_match('/^#[a-f0-9]{6}$/i', $color) ){
+                return '';
+            }
+            return $color;
+        }
+
+        public static function validate_settings_text($text){
+            $text = trim($text);
+            $text = strip_tags($text);
+
+            return $text;
+        }
+
         /**
          * Activation hook
          *
@@ -394,7 +936,7 @@ if ( ! class_exists( 'Chats' ) ) {
                 ;';
                 $wpdb->query( $sql );
 
-                //set options
+                //set default options
                 self::plugin_options('add');
             }else{
                 $sql = 'TRUNCATE TABLE `'.$wpdb->base_prefix.self::$table_prefix.'messages`';
@@ -454,6 +996,8 @@ if ( ! class_exists( 'Chats' ) ) {
             6 => array('status' => 0, 'msg' => 'incorrect request'),
             7 => array('status' => 0, 'msg' => 'plugin should be connected'),
             8 => array('status' => 0, 'msg' => 'wrong key'),
+            9 => array('status' => 1, 'msg' => 'update options success'),
+            10 => array('status' => 0, 'msg' => 'update options failed'),
         );
 
         public static $tagAnswer = 'chats_tag';
@@ -648,8 +1192,18 @@ if ( ! class_exists( 'Chats' ) ) {
         /**
          * Update settings plugin
          */
-        protected static function action_update_options(){
+        protected static function action_update_options($data){
+            $options = @(array)json_decode($data['options'],1);
+            unset($options['personal_key']);
+            if( !empty($options) ){
+                $options = Chats::validate_settings($options, 0);
+            }
+            if( !empty($options) ){
+                Chats::plugin_options('add',$options);
+                self::printAnswer(9);
+            }
 
+            self::printAnswer(10);
         }
 
         /**
@@ -670,6 +1224,7 @@ add_action( 'wp_footer', array('Chats', 'wp_footer') );
 
 //init plugin on admin
 add_action('admin_notices', array('Chats', 'admin_notices'));
+add_action('admin_menu', array('Chats', 'admin_menu'));
 
 //listen incoming request from js
 add_action( 'wp_ajax_jsChatsProcess', array( 'Chats', 'js_process' ) );

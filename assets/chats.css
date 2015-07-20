@@ -49,6 +49,42 @@
     float:left;width: 100%;word-wrap: break-word;
 }
 
+.chats_body_line{
+    float:left;width: 100%;padding: 0 0 10px 0;font-size: 14px;line-height: 18px;font-weight: bold;
+}
+.chats_body_line.center{
+    text-align: center;
+}
+.chats_body_line.thanks{
+    display: none;
+}
+.chats_body_line_label{
+    float:left;width: 100%;font-size: 14px;font-weight: normal;
+}
+.chats_body_line_input{
+    float:left;width: 100%;
+}
+.chats_body_line_input input{
+    float:left;width: 99%;padding: 2px;height: 20px;font-size: 14px;
+}
+.chats_body_line_input textarea{
+    float:left;width: 99%;padding: 2px;height: 40px;font-size: 14px;
+}
+.chats_btn_send_email{
+    float: none;display:inline-block;height: 24px;line-height: 24px;font-size: 12px;margin: 0 auto;padding: 0 15px;cursor: pointer;
+    box-sizing: content-box;
+    color:#646464;border: 1px solid #DADAD9;background: #F4F4F3;
+}
+.offline_status .chats_body{
+    height: auto;
+}
+.finish .chats_body_line.hi{
+    display: none;
+}
+.finish .chats_body_line.thanks{
+    display: block;
+}
+
 /* send */
 .chats_write{
     float: left;width: 100%;
@@ -73,15 +109,15 @@
 .active .chats_btn_finish{
     display: block;
 }
-.chats_btn_finish:hover{
+/*.chats_btn_finish:hover{
     color:#333;border: 1px solid #C4C4C3;background: #FCFCFB;
-}
+}*/
 
 .chats_middle_write{
     float:left;width: 100%;height: 60px;position: relative;
 }
 .chats_middle_write textarea{
-    float:left;margin: 0;padding: 5px;width: 290px;height: 48px;border: none !important;background: #FFF;font-size: 12px;
+    float:left;margin: 0;padding: 5px;width: 290px;height: 50px;border: none !important;background: #FFF;font-size: 12px;
     resize: none;
     box-sizing: content-box;
 }
@@ -89,14 +125,14 @@
     position: absolute;z-index: 10;right: 10px;bottom: 10px;cursor: pointer;width: 15px;height: 13px;
     background: url(enter2.png) center no-repeat;
 }
-.chats_middle_write textarea::-webkit-input-placeholder       {opacity: 0.7; transition: opacity 0.3s ease;}
-.chats_middle_write textarea::-moz-placeholder                {opacity: 0.7; transition: opacity 0.3s ease;}
-.chats_middle_write textarea:-moz-placeholder                 {opacity: 0.7; transition: opacity 0.3s ease;}
-.chats_middle_write textarea:-moz-placeholder                 {opacity: 0.7; transition: opacity 0.3s ease;}
-.chats_middle_write textarea:focus::-webkit-input-placeholder {opacity: 0; transition: opacity 0.3s ease;}
-.chats_middle_write textarea:focus::-moz-placeholder          {opacity: 0; transition: opacity 0.3s ease;}
-.chats_middle_write textarea:focus:-moz-placeholder           {opacity: 0; transition: opacity 0.3s ease;}
-.chats_middle_write textarea:focus:-ms-input-placeholder      {opacity: 0; transition: opacity 0.3s ease;}
+.chats_middle_write textarea::-webkit-input-placeholder       {color:inherit;opacity: 0.7; transition: opacity 0.3s ease;}
+.chats_middle_write textarea::-moz-placeholder                {color:inherit;opacity: 0.7; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:-moz-placeholder                 {color:inherit;opacity: 0.7; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:-moz-placeholder                 {color:inherit;opacity: 0.7; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:focus::-webkit-input-placeholder {color:inherit;opacity: 0; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:focus::-moz-placeholder          {color:inherit;opacity: 0; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:focus:-moz-placeholder           {color:inherit;opacity: 0; transition: opacity 0.3s ease;}
+.chats_middle_write textarea:focus:-ms-input-placeholder      {color:inherit;opacity: 0; transition: opacity 0.3s ease;}
 
 .chats_bottom_write{
     float:left;width: 100%;height: 20px;text-align: center;font-size: 12px;line-height: 20px;

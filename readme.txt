@@ -57,6 +57,11 @@ Screens coming soon
 
 == Changelog ==
 
+= Chat - Live Chat, Support, Sales (Chats version 1.0.1) =
+* To chat was added page with settings (color, background, position, mode, size, personal key, customization of text).
+* To live chats added offline mode.
+* Improved method for adjusting settings, connection of plugin, sending offline messages.
+
 = Chat - Live Chat, Support, Sales (Chats version 1.0.0) =
 * Improved sending of chats messages with ajax. 
 * To chat was added clearing of chat messages after finishing chat. 
