@@ -1,0 +1,79 @@
+#chat_settings_page{
+    float:left;width: 100%;background: #fff;padding: 10px 10px;
+    -moz-box-sizing: border-box;-webkit-box-sizing: border-box;box-sizing: border-box;
+}
+#chat_settings_page .form-table th, #chat_settings_page .form-table td{
+    padding-top: 5px;padding-bottom: 5px;
+}
+#chat_settings_page .form-table th{
+    line-height: 28px;
+}
+#chat_settings_page .form-table td{
+    padding-right: 0;
+}
+#chat_settings_page .tab{
+    float:left;padding: 2px 10px;background: #F8F8F8;margin: 0 20px 20px 0;min-width: 407px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.4);
+}
+p.submit{
+    float: left;width: 100%;padding: 0;
+}
+#chat_settings_page .row_title th{
+    font-size: 16px;text-align: center;
+}
+#chat_settings_page .row_border td{
+    height: 1px;line-height: 1px;padding: 0;border-bottom:1px solid #23282D;
+}
+#chat_settings_page textarea{
+    width: 185px;height: 50px;
+}
+
+#chat_answer_msg{
+    float:left;width: 100%;padding: 10px;font-size: 18px;font-weight: bold;border: 2px solid #ff9aa9;background: #ffc8cf;
+    -moz-box-sizing: border-box;-webkit-box-sizing: border-box;box-sizing: border-box;
+}
+#chat_settings_page #chats_auth_tab .row_title th{
+    font-size: 20px;
+}
+#chat_settings_page #chats_auth_tab th{
+    padding-left: 0;padding-right: 0;
+}
+#chat_settings_page #auth_but{
+   font-size: 14px;font-weight: bold;color: #FFF;padding:5px 10px;height: auto;margin:36px 0 36px 0;
+}
+.arcticmodal-container_i{
+    width: 500px;
+}
+#chats_popup_form_over{
+    float:left;width: 480px;background: #FFF;border: 2px solid #333;padding: 10px;
+}
+#chats_popup_auth_tab .row_title th{
+    text-align: center;font-size: 20px;padding: 0;
+}
+#chats_popup_auth_tab input[type="text"], #chats_popup_auth_tab input[type="password"]{
+    width: 300px !important;
+}
+#chats_popup_auth_tab input[type="text"].invalid, #chats_popup_auth_tab input[type="password"].invalid{
+    border:2px solid #FF0000 !important;
+}
+#chats_popup_auth_tab #auth_but_login, #chats_popup_auth_tab #auth_but_register{
+    font-size: 14px;font-weight: bold;color: #FFF;padding:5px 10px;height: auto;min-width: 155px;
+}
+#chats_popup_auth_tab ul{
+    float:left;width: 100%;margin: 0;padding: 0;list-style: none;text-align: center;
+}
+#chats_popup_auth_tab ul li{
+    float: none;display:inline-block;width: auto;margin: 0;padding: 0 40px 0;
+}
+#chats_color_tab tbody, #chats_text_tab tbody{
+    display: none;
+}
+.chats_tab_action{
+    float: right;width: 28px;height: 28px;cursor: pointer;
+}
+.chats_tab_action:after{
+    content:'\f140';font:400 20px/1 dashicons;
+}
+.active.chats_tab_action:after{
+    content:'\f142';
+}
