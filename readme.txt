@@ -54,7 +54,12 @@ All messages are sent only with presence of a unique API key.
 
 Customer service - is the provision of service to customers. Customer service **before**, customer service **during** and customer service **after** a purchase.
 Using chats plugin, you substantially increase quality of your service, without speaking about increase in sales. You can use chats plugin to activate own, full customized widget at your website to guarantee the highest service for customers.<br />
-Customer support also as well as customer service is a very big step on the way to clients of your business. With Chats plugin (also as chat widget) you will be able to carry out also customer support of your clients on any questions. And YES, this plugin/chat widget is free of charge and you can easily install this chat widget on your website, easily  activate this chat widget and easily customize design of the widget chat.
+Customer support also as well as customer service is a very big step on the way to clients of your business. With Chats plugin (also as chat widget) you will be able to carry out also customer support of your clients on any questions. And YES, this plugin/chat widget is free of charge and you can easily install this chat widget on your website, easily  activate this chat widget and easily customize design of the widget chat to test customer support at your discretion.
+
+= I am going to establish your customer support widget on our public portal. Whether you will support me, during its work? =
+
+We support all our clients irrespective of paid or free version of a support chat of our clients support (customer support).
+
 
 
 == Screenshots ==
