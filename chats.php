@@ -3,7 +3,7 @@
 Plugin Name: Chats
 Plugin URI: http://www.wp-chat.com
 Description: Web Page Chats for Websites
-Version: 1.0.1
+Version: 1.0.2
 Author: wp-chat
 Author URI: http://www.wp-chat.com
 */
@@ -14,10 +14,11 @@ if ( ! class_exists( 'Chats' ) ) {
     class Chats
     {
         public static $plugin_name      = 'chats';
-        public static $plugin_version   = '1.0.1';
+        public static $plugin_version   = '1.0.2';
         public static $table_prefix     = 'chats_';
         public static $tag_prefix       = 'chats';
         public static $optionParameters = 'chats_options';
+        public static $setting_page_url = '/wp-admin/admin.php?page=chats_settings_page';
         public static $defaultOptions   = array(
             'panel_background'          => '#2785C1',
             'panel_border_color'        => '#2785C1',
@@ -52,13 +53,13 @@ if ( ! class_exists( 'Chats' ) ) {
             'name_label'                => 'Name',
             'message_label'             => 'Message',
             'send_email'                => 'Send email',
-            'offline_thank_message'     => 'Thank you. Message was sent.',
+            'offline_thank_message'     => 'Your message was sent. Thank you.',
         );
         public static $cookiePrefix     = 'chats_hash';
         public static $translation = array(
             'en'    => array(
-                'page_settings_title'               => 'Chats Settings',
-                'settings_tab_color'                => 'Colors',
+                'page_settings_title'               => 'Chat Settings',
+                'settings_tab_color'                => 'Chat Interface',
                 'settings_width'                    => 'Width',
                 'settings_panel_background'         => 'Title panel Background',
                 'settings_panel_border_color'       => 'Chat border color',
@@ -77,7 +78,7 @@ if ( ! class_exists( 'Chats' ) ) {
                 'settings_write_area_background'    => 'Write area background',
                 'settings_write_area_color'         => 'Write area color',
 
-                'settings_tab_template'             => 'Template',
+                'settings_tab_template'             => 'Advanced settings',
                 'settings_position'                 => 'Position',
                 'settings_position_left'            => 'Left',
                 'settings_position_right'           => 'Right',
@@ -86,7 +87,7 @@ if ( ! class_exists( 'Chats' ) ) {
                 'settings_status_2'                 => 'Chat hidden',
                 'settings_status_3'                 => 'Chat offline',
 
-                'settings_tab_text'                 => 'Text',
+                'settings_tab_text'                 => 'Chat texts',
                 'settings_admin_signature'          => 'Admin Signature',
                 'settings_user_signature'           => 'User Signature',
                 'settings_hello_message'            => '"Hello" message',
@@ -101,9 +102,26 @@ if ( ! class_exists( 'Chats' ) ) {
                 'settings_send_email'               => 'Send email button',
                 'settings_offline_thank_message'    => '"Offline thank" message',
 
-                'settings_tab_auth'                 => 'Authorization',
+                'settings_tab_auth'                 => 'Chat Activation',
+                'settings_tab_auth2'                => 'Chat Registration and Activation',
                 'settings_personal_key'             => 'Personal key',
                 'settings_personal_key_desc'        => 'Be careful, this key should be the same as in admin panel of site',
+                'settings_auth_email'               => 'Login (E-mail)',
+                'settings_auth_password1'           => 'Password',
+                'settings_auth_password2'           => 'Confirm password',
+                'settings_auth_register_btn'        => 'Register & Activate',
+                'settings_auth_login_btn'           => 'Login',
+                'settings_existing_user'            => 'Existing user',
+                'settings_new_user'                 => 'New user',
+
+                //server answer
+                'answer_server_not_answer'          => 'Could not connect to server',
+                'answer_incorrect_url'              => 'Incorrect url of domain',
+                'answer_incorrect_data'             => 'Form was filed incorrectly',
+                'answer_incorrect_login_or_password'=> 'Incorrect username or password',
+                'answer_user_not_found'             => 'Username not found',
+                'answer_this_username_busy'         => 'Username is busy or incorrect',
+                'answer_login_ok'                   => 'Login successful',
             )
         );
 
@@ -262,29 +280,17 @@ if ( ! class_exists( 'Chats' ) ) {
 
         }
 
-        /**
-         * Notice for user in admin panel
-         */
-        public static function admin_notices(){
-            if(is_admin()) {
-
-                //notice about registration or authorization
-                $plugin         = self::$plugin_name.'/'.self::$plugin_name.'.php';
-                $personaKey     = (string)get_option(ChatsAction::$optionKey, '');
-                $pluginStatus   = is_plugin_active($plugin);
-                if( empty($personaKey) and $pluginStatus ){
-                    global $status, $page, $s;
-                    $nonce      = wp_create_nonce('deactivate-plugin_' . $plugin);
-                    $actions    = 'plugins.php?action=deactivate&amp;plugin=' . urlencode($plugin) . '&amp;plugin_status=' . $status . '&amp;paged=' . $page . '&amp;s=' . $s  . '&amp;_wpnonce=' . $nonce;
-                    echo '<div style="height:50px;line-height:50px;font-size:16px;font-weight:bold;" class="notice-warning notice">To use "chats" plugin, please add this site to <a target="_blank" href="'.ChatsAction::$site.'">your account</a> at '.str_replace('http://','',ChatsAction::$site).' or <a href="'.$actions.'">deactivate</a> Chats plugin.</div>';
-                }
+        public static function admin_init(){
+            if (get_option(self::$optionParameters.'_redirect', false)) {
+                delete_option(self::$optionParameters.'_redirect');
+                wp_redirect(site_url().self::$setting_page_url);exit;
             }
         }
 
         public static function admin_menu(){
             if(is_admin()) {
                 //settings menu for admin
-                add_menu_page('Chats Settings', 'Chats Settings', 'manage_options', 'chats_settings_page', array('Chats', 'chats_settings_page'));
+                add_menu_page('Chat', 'Chat', 'manage_options', 'chats_settings_page', array('Chats', 'chats_settings_page'));
                 add_action( 'admin_init', array('Chats', 'register_settings') );
             }
         }
@@ -409,6 +415,73 @@ if ( ! class_exists( 'Chats' ) ) {
             $requestVars = array('body' => array(ChatsAction::$tagAnswer => ChatsAction::convertString($data,'encode')));
 
             return ChatsAction::requestServer( $requestVars );
+        }
+
+        /**
+         * Authorization of user from plugin
+         */
+        public static function send_auth($mode, $vars = array()){
+            $personalKey    = (string)get_option(ChatsAction::$optionKey, '');
+            $personalKey    = (empty($personalKey) ? md5(time().rand(1,9999).microtime().rand(1,9999)) : $personalKey );
+            $site           = site_url();
+            $data           = array();
+
+            if($mode == 'check'){
+                $data = array(
+                    'action'            => 'auth_check',
+                    'plugin'            => self::$plugin_name,
+                    'plugin_version'    => self::$plugin_version,
+                    'domain'            => site_url()
+                );
+            }
+            if($mode == 'register'){
+                $data = array(
+                    'action'            => 'auth_register',
+                    'key'               => $personalKey,
+                    'username'          => $vars['username'],
+                    'password'          => $vars['password'],
+                    'plugin'            => self::$plugin_name,
+                    'plugin_version'    => self::$plugin_version,
+                    'domain'            => site_url()
+                );
+            }
+            if($mode == 'login'){
+                $data = array(
+                    'action'            => 'auth_login',
+                    'key'               => $personalKey,
+                    'username'          => $vars['username'],
+                    'password'          => $vars['password'],
+                    'plugin'            => self::$plugin_name,
+                    'plugin_version'    => self::$plugin_version,
+                    'domain'            => site_url()
+                );
+            }
+
+            $requestVars    = array('body' => array(ChatsAction::$tagAnswer => ChatsAction::convertString($data,'encode')));
+            $requestAnswer  =  ChatsAction::requestServer( $requestVars, 1 );
+
+            $answerBody     = @trim($requestAnswer['body']);
+            $answerBodyData = array();
+            if( !empty($answerBody) ){
+                $answerBodyData = ChatsAction::convertString($answerBody,'decode');
+            }
+
+            if(@(int)$answerBodyData['status'] == 1){
+                //save key
+                add_option(ChatsAction::$optionKey, $personalKey);
+
+                //save username of user
+                $options = self::plugin_options('get');
+                $options['auth_email'] = $vars['username'];
+                self::plugin_options('add',$options);
+
+            }
+
+            return array(
+                'status'        => @(int)$answerBodyData['msg'],
+                'msg'           => self::trans( (empty($answerBodyData['msg']) ? 'answer_server_not_answer' : $answerBodyData['msg']) ),
+                'redirect_url'  => @$answerBodyData['redirect_url']
+            );
         }
 
         /**
@@ -571,29 +644,84 @@ if ( ! class_exists( 'Chats' ) ) {
 
         public static function chats_settings_page(){
             wp_register_script('chats_settings_js', plugins_url(self::$plugin_name . '/assets/jquery.minicolors.min.js'), array(), self::$plugin_version, false);
+            wp_register_script('chats_settings_js1', plugins_url(self::$plugin_name . '/assets/jquery.arcticmodal.min.js'), array(), self::$plugin_version, false);
+            wp_register_script('chats_settings_js2', plugins_url(self::$plugin_name . '/assets/admin.js'), array(), self::$plugin_version, false);
             wp_register_style( 'chats_settings_css', plugins_url( self::$plugin_name . '/assets/jquery.minicolors.css' ) );
+            wp_register_style( 'chats_settings_css1', plugins_url( self::$plugin_name . '/assets/jquery.arcticmodal.css' ) );
             wp_register_style( 'chats_settings_css2', plugins_url( self::$plugin_name . '/assets/admin.css' ) );
 
             wp_enqueue_script( 'jquery' );
             wp_enqueue_script( 'chats_settings_js' );
+            wp_enqueue_script( 'chats_settings_js1' );
+            wp_enqueue_script( 'chats_settings_js2' );
             wp_enqueue_style( 'chats_settings_css' );
+            wp_enqueue_style( 'chats_settings_css1' );
             wp_enqueue_style( 'chats_settings_css2' );
+
+            $options        = self::plugin_options( 'get' );
+            $personalKey    = (string)get_option(ChatsAction::$optionKey, '');
         ?>
             <div class="wrap" id="chat_settings_page_over">
                 <h2><?php echo self::trans('page_settings_title');?></h2>
-                <form method="post" action="options.php">
+                <div id="chat_settings_page">
+                    <form method="post" action="options.php">
                     <?php
                     settings_fields( self::$optionParameters );
                     //do_settings_sections( self::$plugin_name );
-                    $options        = self::plugin_options( 'get' );
-                    $personalKey    = (string)get_option(ChatsAction::$optionKey, '');
                     ?>
-                    <div id="chat_settings_page">
-                        <div id="chats_color_tab" class="tab">
-                            <table class="form-table">
+                    <div id="chats_auth_tab" class="tab">
+                        <table class="form-table">
+                            <tr class="row_title">
+                                <th scope="row"><?php echo self::trans('settings_tab_auth');?></th>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center"><input onclick="popupAuth(this, '<?php echo admin_url( 'admin-post.php?action=chats_auth_page' );?>');" class="button button-primary" id="auth_but" type="button" value="<?php echo (empty($personalKey) ? self::trans('settings_auth_register_btn') : self::trans('settings_auth_login_btn'));?>" /></th>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="chats_template_tab" class="tab">
+                        <table class="form-table">
+                            <tr class="row_title">
+                                <th scope="row" colspan="2"><?php echo self::trans('settings_tab_template');?></th>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php echo self::trans('settings_width');?>:</th>
+                                <td><input style="width:90px;" type="text" name="<?php echo self::$optionParameters;?>[width]" value="<?php echo esc_attr( @$options['width'] ); ?>" /> px</td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php echo self::trans('settings_position');?>:</th>
+                                <td>
+                                    <select style="width: 185px;" name="<?php echo self::$optionParameters;?>[position]">
+                                        <option <?php echo ( (empty($options['position']) or @$options['position'] == 'right') ? 'selected="selected"' : '');?> value="right"><?php echo self::trans('settings_position_right');?></option>
+                                        <option <?php echo ( @$options['position'] == 'left' ? 'selected="selected"' : '');?> value="left"><?php echo self::trans('settings_position_left');?></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><?php echo self::trans('settings_status');?>:</th>
+                                <td>
+                                    <select style="width: 185px;" name="<?php echo self::$optionParameters;?>[status]">
+                                        <option <?php echo ( @(int)$options['status'] == 1 ? 'selected="selected"' : '');?> value="1"><?php echo self::trans('settings_status_1');?></option>
+                                        <option <?php echo ( @(int)$options['status'] == 2 ? 'selected="selected"' : '');?> value="2"><?php echo self::trans('settings_status_2');?></option>
+                                        <option <?php echo ( @(int)$options['status'] == 3 ? 'selected="selected"' : '');?> value="3"><?php echo self::trans('settings_status_3');?></option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="float:left;width:100%;height: 0px;">&nbsp;</div>
+
+                    <div id="chats_color_tab" class="tab">
+                        <table class="form-table">
+                            <thead>
                                 <tr class="row_title">
-                                    <th scope="row" colspan="2"><?php echo self::trans('settings_tab_color');?></th>
+                                    <th scope="row" colspan="2">
+                                        <?php echo self::trans('settings_tab_color');?>
+                                        <span onclick="showFullContent(this);" class="chats_tab_action">&nbsp;</span>
+                                    </th>
                                 </tr>
+                            </thead>
+                            <tbody>
                                 <tr>
                                     <th style="width: 283px" scope="row"><?php echo self::trans('settings_panel_background');?>:</th>
                                     <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[panel_background]" value="<?php echo esc_attr( @$options['panel_background'] ); ?>" /></td>
@@ -660,14 +788,21 @@ if ( ! class_exists( 'Chats' ) ) {
                                     <th scope="row"><?php echo self::trans('settings_write_area_color');?>:</th>
                                     <td><input class="settings_colorpicker" type="text" name="<?php echo self::$optionParameters;?>[write_area_color]" value="<?php echo esc_attr( @$options['write_area_color'] ); ?>" /></td>
                                 </tr>
-                            </table>
-                        </div>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <div id="chats_text_tab" class="tab">
-                            <table class="form-table">
+                    <div id="chats_text_tab" class="tab">
+                        <table class="form-table">
+                            <thead>
                                 <tr class="row_title">
-                                    <th scope="row" colspan="2"><?php echo self::trans('settings_tab_text');?></th>
+                                    <th scope="row" colspan="2">
+                                        <?php echo self::trans('settings_tab_text');?>
+                                        <span onclick="showFullContent(this);"  class="chats_tab_action">&nbsp;</span>
+                                    </th>
                                 </tr>
+                            </thead>
+                            <tbody>
                                 <tr>
                                     <th scope="row"><?php echo self::trans('settings_panel_title');?>:</th>
                                     <td><input type="text" name="<?php echo self::$optionParameters;?>[panel_title]" value="<?php echo esc_attr( @$options['panel_title'] ); ?>" /></td>
@@ -720,60 +855,13 @@ if ( ! class_exists( 'Chats' ) ) {
                                     <th scope="row"><?php echo self::trans('settings_offline_thank_message');?>:</th>
                                     <td><textarea name="<?php echo self::$optionParameters;?>[offline_thank_message]"><?php echo esc_attr( @$options['offline_thank_message'] ); ?></textarea></td>
                                 </tr>
-                            </table>
-                        </div>
-
-                        <div id="chats_template_tab" class="tab">
-                            <table class="form-table">
-                                <tr class="row_title">
-                                    <th scope="row" colspan="2"><?php echo self::trans('settings_tab_template');?></th>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><?php echo self::trans('settings_width');?>:</th>
-                                    <td><input style="width:90px;" type="text" name="<?php echo self::$optionParameters;?>[width]" value="<?php echo esc_attr( @$options['width'] ); ?>" /> px</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><?php echo self::trans('settings_position');?>:</th>
-                                    <td>
-                                        <select style="width: 185px;" name="<?php echo self::$optionParameters;?>[position]">
-                                            <option <?php echo ( (empty($options['position']) or @$options['position'] == 'right') ? 'selected="selected"' : '');?> value="right"><?php echo self::trans('settings_position_right');?></option>
-                                            <option <?php echo ( @$options['position'] == 'left' ? 'selected="selected"' : '');?> value="left"><?php echo self::trans('settings_position_left');?></option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><?php echo self::trans('settings_status');?>:</th>
-                                    <td>
-                                        <select style="width: 185px;" name="<?php echo self::$optionParameters;?>[status]">
-                                            <option <?php echo ( @(int)$options['status'] == 1 ? 'selected="selected"' : '');?> value="1"><?php echo self::trans('settings_status_1');?></option>
-                                            <option <?php echo ( @(int)$options['status'] == 2 ? 'selected="selected"' : '');?> value="2"><?php echo self::trans('settings_status_2');?></option>
-                                            <option <?php echo ( @(int)$options['status'] == 3 ? 'selected="selected"' : '');?> value="3"><?php echo self::trans('settings_status_3');?></option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <div id="chats_auth_tab" class="tab">
-                            <table class="form-table">
-                                <tr class="row_title">
-                                    <th scope="row" colspan="2"><?php echo self::trans('settings_tab_auth');?></th>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><?php echo self::trans('settings_personal_key');?>:</th>
-                                    <td>
-                                        <input type="text" name="<?php echo self::$optionParameters;?>[personal_key]" value="<?php echo esc_attr($personalKey);?>" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colspan="2"><?php echo self::trans('settings_personal_key_desc').' '.ChatsAction::$adminRequestSite;?></th>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <?php submit_button(); ?>
+                            </tbody>
+                        </table>
                     </div>
-                </form>
+
+                    <?php submit_button(); ?>
+                    </form>
+                </div>
             </div>
             <script>
                 jQuery(document).ready( function() {
@@ -790,6 +878,86 @@ if ( ! class_exists( 'Chats' ) ) {
                 })
             </script>
         <?php
+        }
+
+        public static function chats_auth_page(){
+            $personalKey    = (string)get_option(ChatsAction::$optionKey, '');
+            $options        = self::plugin_options( 'get' );
+
+            $authEmail      = @trim($_POST[self::$optionParameters]['auth_email']);
+            $authPassword1  = @trim($_POST[self::$optionParameters]['auth_password1']);
+            $authPassword2  = @trim($_POST[self::$optionParameters]['auth_password2']);
+            $auth_type      = @(int)$_REQUEST[self::$optionParameters]['auth_type'];
+            $processRes     = array();
+
+            if($auth_type){
+                if($auth_type == 2){
+                    //register
+                    if( !empty($authEmail) and !empty($authPassword1) and !empty($authPassword2) and $authPassword1 == $authPassword2 ){
+                        $processRes = self::send_auth('register', array('username' => $authEmail, 'password' => $authPassword1));
+                    }else{
+                        $processRes = array('status' => 0, 'msg' => self::trans('answer_incorrect_login_or_password'));
+                    }
+                }else{
+                    //login
+                    if( !empty($authEmail) and !empty($authPassword1) ){
+                        $processRes = self::send_auth('login', array('username' => $authEmail, 'password' => $authPassword1));
+                    }else{
+                        $processRes = array('status' => 0, 'msg' => self::trans('answer_incorrect_login_or_password'));
+                    }
+                }
+                print json_encode($processRes);exit;
+            }
+
+            ob_start();
+            ?>
+            <form method="post" action="<?php echo admin_url( 'admin-post.php?action=chats_auth_page' )?>">
+                <div id="chats_popup_auth_tab" class="tab">
+                    <table class="form-table">
+                        <tr class="row_title">
+                            <th scope="row" colspan="2"><?php echo self::trans('settings_tab_auth');?></th>
+                        </tr>
+                        <tr class="row_title">
+                            <td colspan="2">
+                                <ul>
+                                    <li>
+                                        <input class="auth_type_field" onchange="popupAuthType(this,1);" <?php echo ((!empty($personalKey) or $auth_type == 1) ? 'checked="checked"' : '');?> type="radio" value="1" name="<?php echo self::$optionParameters;?>[auth_type]" />
+                                        <label><?php echo self::trans('settings_existing_user');?></label>
+                                    </li>
+                                    <li>
+                                        <input class="auth_type_field" onchange="popupAuthType(this,2);"  <?php echo ((empty($personalKey) or $auth_type == 2) ? 'checked="checked"' : '');?> type="radio" value="2" name="<?php echo self::$optionParameters;?>[auth_type]" />
+                                        <label><?php echo self::trans('settings_new_user');?></label>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><span class="label"><?php echo self::trans('settings_auth_email');?>:</span></th>
+                            <td><input class="auth_email_field" style="float:left;" <?php echo (!empty($options['auth_email']) ? 'readonly="readonly"' : '');?> type="text" name="<?php echo self::$optionParameters;?>[auth_email]" value="<?php echo @esc_attr($options['auth_email']);?>" /></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><span class="label"><?php echo self::trans('settings_auth_password1');?>:</span></th>
+                            <td><input class="auth_password1_field" style="float:left;" type="password" name="<?php echo self::$optionParameters;?>[auth_password1]" value="<?php echo esc_attr('');?>" /></td>
+                        </tr>
+                        <tr id="tr_confirm_password" style="<?php echo ((!empty($personalKey) or $auth_type == 1) ? 'display:none;' : '');?>">
+                            <th scope="row"><span class="label"><?php echo self::trans('settings_auth_password2');?>:</span></th>
+                            <td><input class="auth_password2_field" style="float:left;" type="password" name="<?php echo self::$optionParameters;?>[auth_password2]" value="<?php echo esc_attr('');?>" /></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align:center;">
+                                <input onclick="processAuth(this,2);" style="<?php echo ((empty($personalKey) or $auth_type == 2) ? 'display:none;' : '');?>" class="button button-primary" id="auth_but_login" type="button" value="<?php echo self::trans('settings_auth_login_btn');?>" />
+                                <input onclick="processAuth(this,1);" style="<?php echo ((!empty($personalKey) or $auth_type == 1) ? 'display:none;' : '');?>" class="button button-primary" id="auth_but_register" type="button" value="<?php echo self::trans('settings_auth_register_btn');?>" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <input type="hidden" name="<?php echo self::$optionParameters;?>[auth_process]" value="1" />
+            </form>
+            <?php
+            $html = ob_get_contents();
+            ob_clean();
+
+            echo $html;
         }
 
         public static function register_settings(){
@@ -870,10 +1038,10 @@ if ( ! class_exists( 'Chats' ) ) {
             $input['send_email']                = (empty($input['send_email'])              ? self::$defaultOptions['send_email']               : $input['send_email']);
             $input['offline_thank_message']     = (empty($input['offline_thank_message'])   ? self::$defaultOptions['offline_thank_message']    : $input['offline_thank_message']);
 
-            //special case for personal key
-            if( isset($input['personal_key']) ){
-                update_option(ChatsAction::$optionKey, $input['personal_key']);
-                unset($input['personal_key']);
+            //do not change login of user here
+            if( empty($input['auth_email']) ){
+                $options = self::plugin_options('get');
+                $input['auth_email'] = $options['auth_email'];
             }
 
             //send options to server
@@ -910,38 +1078,38 @@ if ( ! class_exists( 'Chats' ) ) {
             global $wpdb;
 
             // Get the correct character collate
-            $charset_collate = 'utf8';
-            if ( ! empty( $wpdb->charset ) ) {
-                $charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
-            }
-            if ( ! empty( $wpdb->collate ) ) {
-                $charset_collate .= " COLLATE $wpdb->collate";
-            }
+            $charset_collate = 'DEFAULT CHARACTER SET=utf8';
+            if ( ! empty( $wpdb->charset ) ) {$charset_collate = 'DEFAULT CHARACTER SET='.$wpdb->charset;}
+            if ( ! empty( $wpdb->collate ) ) {$charset_collate .= ' COLLATE='.$wpdb->collate;}
 
-            if ( $wpdb->get_var( 'SHOW TABLES LIKE "' . $wpdb->base_prefix.self::$table_prefix.'message'.'" ' ) != $wpdb->base_prefix.self::$table_prefix.'message' ) {
-                // Setup chat message table
-                $sql = '
-                    CREATE TABLE IF NOT EXISTS `'.$wpdb->base_prefix.self::$table_prefix.'messages` (
-                        `id` int(11) NOT NULL AUTO_INCREMENT,
-                        `user_hash` varchar(10) NOT NULL DEFAULT "",
-                        `user_ip` varchar(40) NOT NULL DEFAULT "",
-                        `user_browser` varchar(255) NOT NULL DEFAULT "",
-                        `user_name` varchar(50) NOT NULL DEFAULT "",
-                        `message` varchar(1000) NOT NULL DEFAULT "",
-                        `message_page` varchar(255) NOT NULL DEFAULT "",
-                        `created` datetime DEFAULT NULL,
-                        `message_type` tinyint(1) NOT NULL DEFAULT "0" COMMENT "1 - admin, 0 - user",
-                        PRIMARY KEY (`id`)
-                    ) ENGINE=MyISAM DEFAULT CHARSET='.$charset_collate.' AUTO_INCREMENT=1
-                ;';
-                $wpdb->query( $sql );
+            // Setup chat message table
+            $sql = '
+                CREATE TABLE IF NOT EXISTS `'.$wpdb->base_prefix.self::$table_prefix.'messages` (
+                    `id` int(11) NOT NULL AUTO_INCREMENT,
+                    `user_hash` varchar(10) NOT NULL DEFAULT "",
+                    `user_ip` varchar(40) NOT NULL DEFAULT "",
+                    `user_browser` varchar(255) NOT NULL DEFAULT "",
+                    `user_name` varchar(50) NOT NULL DEFAULT "",
+                    `message` varchar(1000) NOT NULL DEFAULT "",
+                    `message_page` varchar(255) NOT NULL DEFAULT "",
+                    `created` datetime DEFAULT NULL,
+                    `message_type` tinyint(1) NOT NULL DEFAULT "0" COMMENT "1 - admin, 0 - user",
+                    PRIMARY KEY (`id`)
+                ) ENGINE=MyISAM '.$charset_collate.' AUTO_INCREMENT=1
+            ;';
+            $wpdb->query( $sql );
 
-                //set default options
+            $sql = 'TRUNCATE TABLE `'.$wpdb->base_prefix.self::$table_prefix.'messages`';
+            $wpdb->query( $sql );
+
+            //Adjust default options
+            $options = get_option(self::$optionParameters, array());
+            if( empty($options) ){
                 self::plugin_options('add');
-            }else{
-                $sql = 'TRUNCATE TABLE `'.$wpdb->base_prefix.self::$table_prefix.'messages`';
-                $wpdb->query( $sql );
             }
+
+            //Prepare redirect to settings page
+            add_option(self::$optionParameters.'_redirect', true);
         }
 
         /**
@@ -1062,17 +1230,17 @@ if ( ! class_exists( 'Chats' ) ) {
         /**
          * Send message from user to admin
          */
-        public static function requestServer($args){
+        public static function requestServer($args, $fullAnswer = 0){
             $url        = trim(self::$adminRequestSite,'/') . self::$adminRequestUrl;
             $postRes    = wp_remote_post( $url, $args );
 
             if ( is_wp_error( $postRes ) ) {
                 $error = array( 'wp_error' => $postRes->get_error_message() );
 
-                return false;
+                return ($fullAnswer ? $postRes : false);
             }
 
-            return true;
+            return ($fullAnswer ? $postRes : true);
         }
 
         /**
@@ -1223,8 +1391,9 @@ add_action( 'wp_head', array('Chats', 'wp_head') );
 add_action( 'wp_footer', array('Chats', 'wp_footer') );
 
 //init plugin on admin
-add_action('admin_notices', array('Chats', 'admin_notices'));
-add_action('admin_menu', array('Chats', 'admin_menu'));
+add_action('admin_init', array( 'Chats', 'admin_init') );
+add_action('admin_menu', array('Chats', 'admin_menu') );
+add_action('admin_post_chats_auth_page', array( 'Chats', 'chats_auth_page') );
 
 //listen incoming request from js
 add_action( 'wp_ajax_jsChatsProcess', array( 'Chats', 'js_process' ) );

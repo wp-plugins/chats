@@ -1,6 +1,6 @@
 === Chat - Live Chat, Support, Sales ===
 Plugin Name: Chat
-Version: 1.0.0
+Version: 1.0.2
 Donate link: http://www.wp-chat.com/donate
 URI: www.wp-chat.com
 Tags: chat, chats, Online, Live, Online chat, Live Chat, chat online, chat widget, customer, customer help, support, customer support, customer service, chat live, help, live help, livechat, wp chat, WordPress chat, help desk, helpdesk, free chat, buddypress, buddypress chat, chat tool, tool, free live chat, group chat, online live chat, online support, plugin chat, private message, web chat, webchat, bbPress, bbPress chat, php chat, contact, sale, sale support, sales support, live support, website chat, live chatting, chatting, tools, assistance
@@ -52,7 +52,7 @@ All messages are sent only with presence of a unique API key.
 
 = I want to use this chats plugin as a customer service or customer support. Is it possible? =
 
-Customer service - is the provision of service to customers. Customer service **before**, customer service **during** and customer service **after** a purchase. 
+Customer service - is the provision of service to customers. Customer service **before**, customer service **during** and customer service **after** a purchase.
 Using chats plugin, you substantially increase quality of your service, without speaking about increase in sales. You can use chats plugin to activate own, full customized widget at your website to guarantee the highest service for customers.<br />
 Customer support also as well as customer service is a very big step on the way to clients of your business. With Chats plugin (also as chat widget) you will be able to carry out also customer support of your clients on any questions. And YES, this plugin/chat widget is free of charge and you can easily install this chat widget on your website, easily  activate this chat widget and easily customize design of the widget chat.
 
@@ -62,6 +62,10 @@ Customer support also as well as customer service is a very big step on the way 
 Screens coming soon
 
 == Changelog ==
+
+= Chat - Live Chat, Support, Sales (Chats version 1.0.2) =
+* Improved template for page with settings.
+* Added area for quick authorization and activation of chat.
 
 = Chat - Live Chat, Support, Sales (Chats version 1.0.1) =
 * To chat was added page with settings (color, background, position, mode, size, personal key, customization of text).
