@@ -5,7 +5,7 @@ Donate link: http://www.wp-chat.com/donate
 URI: www.wp-chat.com
 Tags: chat, chats, Online, Live, Online chat, Live Chat, chat online, chat widget, customer, customer help, support, customer support, customer service, chat live, help, live help, livechat, wp chat, WordPress chat, help desk, helpdesk, free chat, buddypress, buddypress chat, chat tool, tool, free live chat, group chat, online live chat, online support, plugin chat, private message, web chat, webchat, bbPress, bbPress chat, php chat, contact, sale, sale support, sales support, live support, website chat, live chatting, chatting, tools, assistance
 Requires at least: 3.9
-Tested up to: 4.2.2
+Tested up to: 4.2.4
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
