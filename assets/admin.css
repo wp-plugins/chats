@@ -77,3 +77,20 @@ p.submit{
 .active.chats_tab_action:after{
     content:'\f142';
 }
+/*default style */
+@media only screen and (max-width: 960px) {
+/*
+tablet computer
+*/
+}
+@media only screen and (max-width: 1124px) {
+
+}
+@media only screen and (max-width: 758px) {
+/*
+vertical tablet computer
+*/
+}
+@media only screen and (max-width: 524px) {
+/*phone*/
+}
