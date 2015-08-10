@@ -16,7 +16,7 @@ Live Chat & Online Chat for Websites. Online chat: supports sales, customer supp
 
 == Description ==
 
-This is a Free Online Live Chat Plugin with paid Service: Online Live Chat for Websites
+This is a Free Online Live Chat Plugin with free Service or paid Service: Online Live Chat for Websites
 
 To use this service, you need to add your site to your account at www.wp-chat.com.
 After adding the site to your control panel at wp-chat.com, your chat will be signed with a safety API key and automatically activated for all visitors of your website .
