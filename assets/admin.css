@@ -77,20 +77,40 @@ p.submit{
 .active.chats_tab_action:after{
     content:'\f142';
 }
+.form-color-background {
+    margin-top:20px;
+    padding: 10px;   
+    border: 1px solid #ddd;
+}
 /*default style */
 @media only screen and (max-width: 960px) {
 /*
 tablet computer
 */
+.form-color-background {
+    margin-top:15px;
+    padding: 8px;   
+}
 }
 @media only screen and (max-width: 1124px) {
-
+ .form-color-background {
+    margin-top:10px;
+    padding: 6px;   
+}
 }
 @media only screen and (max-width: 758px) {
 /*
 vertical tablet computer
 */
+.form-color-background {
+    margin-top:5px;
+    padding: 4px;   
+}
 }
 @media only screen and (max-width: 524px) {
 /*phone*/
+.form-color-background {
+    margin-top:3px;
+    padding: 3px;   
+}
 }
